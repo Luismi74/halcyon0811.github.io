@@ -1,108 +1,77 @@
 <!DOCTYPE html>
-<meta charset="utf-8">
-<style>
+<html lang="en">
 
-.links line {
-  stroke: #999;
-  stroke-opacity: 0.6;
-}
+<head>
+    <meta charset="utf-8">
+    <title>Projects</title>
+    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="src/style.css">
+    <link href="./build/nv.d3.css" rel="stylesheet" type="text/css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js" charset="utf-8"></script>
+    <script src="./build/nv.d3.js"></script>
+    <script src="./projects/assets_network/overview.js"></script>
+    <!-- <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script> -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://d3js.org/d3-queue.v3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/3.13.3/math.js"></script>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+</head>
 
-.nodes circle {
-  stroke: #fff;
-  stroke-width: 1.5px;
-}
+<body class="bg-darkslate">
 
-text {
-  font-family: sans-serif;
-  font-size: 10px;
-}
+    <header class="flex-1 md:h-16 md:flex md:items-center md:justify-between space-x-10 lg:space-x-6 md:px-32 md:py-12 md:w-11/12 pb-4">
+        <img src="/src/imgs/lidaXu.png" alt="Logo" class="flex justify-center md:justify-start h-24 px-24 md:h-32 md:px-20 py-2">
+        <div class="md:flex-1 md:text-gray-100 md:text-center md:px-4 md:py-2 md:m-2"></div>
+        <a class="text-white lg:text-2xl text-xl px-10 md:px-2 cursor-pointer" href="/index.html">Home</a>
+        <a class="text-white lg:text-2xl text-xl px-2 cursor-pointer" href="/src/projects.html" target="_blank">Projects</a>
+    </header>
 
-</style>
-<svg width="960" height="600"></svg>
-<script src="https://d3js.org/d3.v4.min.js"></script>
-<script>
+    <section>
+        <h1>Asset Network Clustering and Classification</h1>
+        <div id="assets_dendrogram"></div>
+        <table>
+            <tr style="text-align:center">
+                <td><img width="300" height="300" src="./imgs/correlation.png" alt="Assets Correlation"></td>
+                <td><img width="300" height="300" src="./imgs/dendrogram.png" alt="Dndrogram Clustering"></td>
+                <td>
+                    <div id="assets_lead_lag_clustering"></div>
+                </td>
+            </tr>
+        </table>
+    </section>
 
-var svg = d3.select("svg"),
-    width = +svg.attr("width"),
-    height = +svg.attr("height");
+    <section>
+        <h1>Implied Volatility Smirks of Individual Options</h1>
+        <div id=""></div>
+        <div id=""></div>
+        <table>
+            <tr style="text-align:center">
+                <td><img width="500" height="300" src="./imgs/implied_vol_idea.png" alt="Assets Correlation"></td>
+                <td><img width="500" height="300" src="./imgs/implied_vol_res.png" alt="Dndrogram Clustering"></td>
+                <td>
+                    <div id="assets_lead_lag_clustering"></div>
+                </td>
+            </tr>
+        </table>
 
-var color = d3.scaleOrdinal(d3.schemeCategory20);
+    </section>
 
-var simulation = d3.forceSimulation()
-    .force("link", d3.forceLink().id(function(d) { return d.id; }))
-    .force("charge", d3.forceManyBody())
-    .force("center", d3.forceCenter(width / 2, height / 2));
 
-d3.json("data.json", function(error, graph) {
-  if (error) throw error;
 
-  var link = svg.append("g")
-      .attr("class", "links")
-    .selectAll("line")
-    .data(graph.links)
-    .enter().append("line")
-      .attr("stroke-width", function(d) { return Math.sqrt(d.value); });
+    <!-- 
+  <script>
+    $(function () {
+      $("#assets_dendrogram").load("./projects/assets_network/dendrogram.html");
+    });
+  </script> -->
 
-  var node = svg.append("g")
-      .attr("class", "nodes")
-    .selectAll("g")
-    .data(graph.nodes)
-    .enter().append("g")
-    
-  var circles = node.append("circle")
-      .attr("r", 5)
-      .attr("fill", function(d) { return color(d.group); })
-      .call(d3.drag()
-          .on("start", dragstarted)
-          .on("drag", dragged)
-          .on("end", dragended));
+    <script>
+        $(function() {
+            $("#assets_lead_lag_clustering").load("./projects/assets_network/fdg.html");
+        });
+    </script>
+    <script>
+    </script>
+</body>
 
-  var lables = node.append("text")
-      .text(function(d) {
-        return d.id;
-      })
-      .attr('x', 6)
-      .attr('y', 3);
-
-  node.append("title")
-      .text(function(d) { return d.id; });
-
-  simulation
-      .nodes(graph.nodes)
-      .on("tick", ticked);
-
-  simulation.force("link")
-      .links(graph.links);
-
-  function ticked() {
-    link
-        .attr("x1", function(d) { return d.source.x; })
-        .attr("y1", function(d) { return d.source.y; })
-        .attr("x2", function(d) { return d.target.x; })
-        .attr("y2", function(d) { return d.target.y; });
-
-    node
-        .attr("transform", function(d) {
-          return "translate(" + d.x + "," + d.y + ")";
-        })
-  }
-});
-
-function dragstarted(d) {
-  if (!d3.event.active) simulation.alphaTarget(0.3).restart();
-  d.fx = d.x;
-  d.fy = d.y;
-}
-
-function dragged(d) {
-  d.fx = d3.event.x;
-  d.fy = d3.event.y;
-}
-
-function dragended(d) {
-  if (!d3.event.active) simulation.alphaTarget(0);
-  d.fx = null;
-  d.fy = null;
-}
-
-</script>
+</html>
